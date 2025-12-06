@@ -40,7 +40,10 @@ import {
   PlayCircle,
   HelpCircle,
   ShieldAlert,
-  Target
+  Target,
+  Cloud,
+  Terminal,
+  Code2
 } from 'lucide-react';
 
 // --- TYPES ---
@@ -70,7 +73,7 @@ interface Attachment {
   size: number;
 }
 
-type Tab = 'generator' | 'ideas' | 'channel_ideas' | 'trending' | 'research' | 'history' | 'settings' | 'docs' | 'logs' | 'versions';
+type Tab = 'generator' | 'ideas' | 'channel_ideas' | 'trending' | 'research' | 'history' | 'settings' | 'docs' | 'deploy' | 'logs' | 'versions';
 
 interface ChangelogEntry {
   version: string;
@@ -80,10 +83,18 @@ interface ChangelogEntry {
 
 // --- CONSTANTS ---
 
-const APP_VERSION = "1.5.1";
+const APP_VERSION = "1.6.0";
 const APP_NAME = "The Inverter";
 
 const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.6.0",
+    date: "2024-05-27",
+    changes: [
+      "Added 'Deployment Guide' tab: Step-by-step instructions to deploy to Cloudflare Pages.",
+      "Provided code migration guide from AI Studio to Vite (React+TS)."
+    ]
+  },
   {
     version: "1.5.1",
     date: "2024-05-26",
@@ -1109,6 +1120,112 @@ const App = () => {
     </div>
   );
 
+  const renderDeploy = () => (
+    <div className="h-full overflow-y-auto px-4 pb-20 max-w-4xl mx-auto">
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <Cloud className="text-primary" size={32} />
+            Deploy lên Cloudflare Pages
+        </h1>
+        <p className="text-gray-400">
+            Vì đây là một React App hiện đại (sử dụng .tsx và modules), để đưa lên web thực tế, bạn cần một công cụ đóng gói (Build Tool) như Vite. 
+            Dưới đây là hướng dẫn từng bước để bạn tự deploy.
+        </p>
+      </div>
+
+      <div className="space-y-8">
+        
+        {/* Step 1 */}
+        <div className="bg-surface border border-gray-700 rounded-xl overflow-hidden">
+            <div className="bg-gray-900/50 p-4 border-b border-gray-700 flex items-center gap-2">
+                <Terminal size={20} className="text-green-400" />
+                <h3 className="font-bold text-white">Bước 1: Khởi tạo Project (Local)</h3>
+            </div>
+            <div className="p-6">
+                <p className="text-gray-300 mb-4">Mở Terminal trên máy tính của bạn và chạy lệnh sau để tạo khung project React + TypeScript:</p>
+                <div className="bg-black p-4 rounded-lg font-mono text-sm text-gray-300 border border-gray-700 relative group">
+                    <code className="block text-green-400">npm create vite@latest the-inverter -- --template react-ts</code>
+                    <code className="block mt-2">cd the-inverter</code>
+                    <code className="block">npm install</code>
+                    <button onClick={() => navigator.clipboard.writeText("npm create vite@latest the-inverter -- --template react-ts\ncd the-inverter\nnpm install")} className="absolute top-2 right-2 p-2 hover:bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition"><Copy size={14}/></button>
+                </div>
+            </div>
+        </div>
+
+        {/* Step 2 */}
+        <div className="bg-surface border border-gray-700 rounded-xl overflow-hidden">
+            <div className="bg-gray-900/50 p-4 border-b border-gray-700 flex items-center gap-2">
+                <Terminal size={20} className="text-yellow-400" />
+                <h3 className="font-bold text-white">Bước 2: Cài đặt thư viện</h3>
+            </div>
+            <div className="p-6">
+                <p className="text-gray-300 mb-4">Cài đặt đúng các thư viện mà App này đang sử dụng:</p>
+                <div className="bg-black p-4 rounded-lg font-mono text-sm text-gray-300 border border-gray-700 relative group">
+                    <code className="block text-yellow-400">npm install @google/genai react-markdown remark-gfm lucide-react</code>
+                    <button onClick={() => navigator.clipboard.writeText("npm install @google/genai react-markdown remark-gfm lucide-react")} className="absolute top-2 right-2 p-2 hover:bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition"><Copy size={14}/></button>
+                </div>
+            </div>
+        </div>
+
+        {/* Step 3 */}
+        <div className="bg-surface border border-gray-700 rounded-xl overflow-hidden">
+            <div className="bg-gray-900/50 p-4 border-b border-gray-700 flex items-center gap-2">
+                <Code2 size={20} className="text-blue-400" />
+                <h3 className="font-bold text-white">Bước 3: Copy Code</h3>
+            </div>
+            <div className="p-6 space-y-4">
+                <p className="text-gray-300">
+                    Mở file <code className="bg-gray-700 px-1 rounded">src/App.tsx</code> trong project vừa tạo, xóa hết nội dung cũ và copy toàn bộ code từ file <code className="bg-gray-700 px-1 rounded">index.tsx</code> của app này vào.
+                </p>
+                
+                <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-lg">
+                    <h4 className="font-bold text-red-400 text-sm mb-2">⚠️ LƯU Ý QUAN TRỌNG:</h4>
+                    <p className="text-xs text-gray-300">
+                        Vì code này đang chạy trên trình duyệt (không có build step), ở cuối file có đoạn: <br/>
+                        <code className="text-yellow-400">const root = createRoot(...)</code>. <br/>
+                        Khi chuyển sang Vite, bạn hãy <b>XÓA</b> đoạn đó đi và chỉ giữ lại component <code className="text-blue-300">App</code> và các function/biến bên trên. File <code className="bg-gray-800 px-1 rounded">main.tsx</code> của Vite sẽ tự lo phần render.
+                    </p>
+                </div>
+
+                <div className="bg-black p-4 rounded-lg font-mono text-xs text-gray-400 border border-gray-700 max-h-40 overflow-y-auto">
+                    {`// src/App.tsx (Example structure)
+import React, { ... } from 'react';
+// ... imports ...
+
+// ... constants & components ...
+
+const App = () => {
+   // ... toàn bộ logic của App ...
+   return ( ... );
+}
+
+export default App; // <--- Nhớ export default App`}
+                </div>
+            </div>
+        </div>
+
+        {/* Step 4 */}
+        <div className="bg-surface border border-gray-700 rounded-xl overflow-hidden">
+            <div className="bg-gray-900/50 p-4 border-b border-gray-700 flex items-center gap-2">
+                <Cloud size={20} className="text-orange-400" />
+                <h3 className="font-bold text-white">Bước 4: Deploy lên Cloudflare Pages</h3>
+            </div>
+            <div className="p-6">
+                <ol className="list-decimal pl-5 space-y-3 text-gray-300">
+                    <li>Chạy lệnh build: <code className="bg-black px-2 py-1 rounded text-green-400">npm run build</code>. Một thư mục <code className="bg-gray-700 px-1 rounded">dist</code> sẽ được tạo ra.</li>
+                    <li>Đăng nhập <a href="https://dash.cloudflare.com" target="_blank" className="text-primary hover:underline">Cloudflare Dashboard</a>.</li>
+                    <li>Vào mục <b>Workers & Pages</b> -> <b>Create Application</b> -> Tab <b>Pages</b>.</li>
+                    <li>Chọn <b>Upload Assets</b> (hoặc Connect to Git nếu bạn đã push code lên GitHub).</li>
+                    <li>Kéo thả thư mục <code className="bg-gray-700 px-1 rounded">dist</code> vừa tạo vào đó.</li>
+                    <li>Xong! App của bạn đã chạy online.</li>
+                </ol>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  );
+
   const renderSettings = () => (
     <div className="max-w-2xl mx-auto space-y-6">
         <div className="bg-surface p-6 rounded-xl border border-gray-700 shadow-lg">
@@ -1195,6 +1312,7 @@ const App = () => {
           <SidebarItem id="research" icon={Microscope} label={sidebarOpen ? (language === 'vi' ? 'Nghiên Cứu Sâu' : 'Deep Research') : ''} />
           <div className="my-2 border-t border-gray-700/50 mx-4"></div>
           <SidebarItem id="docs" icon={HelpCircle} label={sidebarOpen ? (language === 'vi' ? 'Hướng Dẫn / Guide' : 'Documentation') : ''} />
+          <SidebarItem id="deploy" icon={Rocket} label={sidebarOpen ? (language === 'vi' ? 'Deploy Guide' : 'Deploy Guide') : ''} />
           <SidebarItem id="history" icon={History} label={sidebarOpen ? (language === 'vi' ? 'Lịch Sử' : 'History') : ''} />
           <SidebarItem id="versions" icon={GitBranch} label={sidebarOpen ? (language === 'vi' ? 'Phiên Bản' : 'Versions') : ''} />
           <SidebarItem id="settings" icon={Settings} label={sidebarOpen ? (language === 'vi' ? 'Cài Đặt' : 'Settings') : ''} />
@@ -1219,6 +1337,7 @@ const App = () => {
             {activeTab === 'settings' && renderSettings()}
             {activeTab === 'versions' && renderVersions()}
             {activeTab === 'docs' && renderDocs()}
+            {activeTab === 'deploy' && renderDeploy()}
         </div>
       </div>
     </div>
